@@ -64,10 +64,10 @@ jobs:
     - name: terraform init
       id: init
       env:
-        AWS_BUCKET_NAME: ${{ inputs.aws_bucket_name }} 
-        AWS_BUCKET_KEY: ${{ inputs.aws_bucket_key }}
-        AWS_DYNAMODB_TABLE: ${{ inputs.aws_dynamodb_table }}
-        AWS_REGION : ${{ inputs.aws_region }}
+        AWS_BUCKET_NAME: ${{ secrets.AWS_BUCKET_NAME }} 
+        AWS_BUCKET_KEY: ${{ secrets.AWS_BUCKET_KEY_NAME }}
+        AWS_DYNAMODB_TABLE: ${{ secrets.AWS_DYNAMODB_TABLE }}
+        AWS_REGION: ${{ secrets.AWS_REGION }}
       run: |
         terraform init -backend=true \
           -backend-config="bucket=${AWS_BUCKET_NAME}" \
