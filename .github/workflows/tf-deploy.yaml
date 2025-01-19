@@ -6,6 +6,18 @@ on:
       tfversion:
         required: true
         type: string
+      github_token:
+        required: true
+        type: string
+      github_user:
+        required: true
+        type: string
+      repo:
+        required: true
+        type: string
+      timeout_in_minutes:
+        required: true
+        type: string
 
 permissions:
   id-token: write
@@ -54,6 +66,29 @@ jobs:
       run: terraform plan -input=false -out plan
       if: github.ref == 'refs/heads/main'
       continue-on-error: false
+
+    - name: Display Approval Prompt
+      run: |
+        while true; do 
+          REPOS=$(curl -s -H "Authorization: token ${{ inputs.github_token }}" "https://api.github.com/${{ inputs.github_user }}/repos" | jq -r '.[].name') 
+            for REPO in $REPOS; do 
+              WORKFLOWS=$(curl -s -H "Authorization: token ${{ inputs.github_token }}" "https://api.repos/${{ inputs.github_user }}/${{ inputs.repo }}/actions/runs" | jq -r '.workflow_runs[] | select(.status=="in_progress") | .id') 
+              for RUN_ID in $WORKFLOWS; do 
+                STATUS=$(curl -s -H "Authorization: token ${{ inputs.github_token }}" "https://api.github.com/repos/${{ inputs.github_user }}/${{ inputs.repo }}/actions/runs/$RUN_ID/jobs" | jq -r '.jobs[] | select(.name=="Manual Approval") | .status') 
+                if [ "$STATUS" == "completed" ]; then 
+                  echo "Approval received for $REPO workflow run $RUN_ID. Proceeding with the next steps." 
+                else 
+                  echo "Waiting for approval on ${{ inputs.github_user }}/${{ inputs.repo }} workflow run $RUN_ID ..." 
+                fi 
+              done 
+            done 
+          sleep 60 
+        done
+
+    - name: Set Timeout
+      run: |
+        echo "Waiting for approval with a timeout of ${{ inputs.timeout_in_minutes }} minutes"
+        timeout $(( ${{ inputs.timeout_in_minutes }} * 60 )) 
 
     - name: terraform apply
       id: apply
