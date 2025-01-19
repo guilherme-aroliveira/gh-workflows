@@ -1,0 +1,37 @@
+name: 'Security Scan'
+
+on:
+  workflow_call:
+
+jobs:
+
+  scan: 
+    name: gitleaks
+    runs-on: ubuntu-latest
+
+    steps: 
+
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup gitleaks
+      run: |
+        sudo apt-get update
+        GITLEAKS_VERSION=$(curl -s "https://api.github.com/repos/gitleaks/gitleaks/releases/latest" | grep -Po '"tag_name": "v\K[0-9.]+')
+        wget -qO gitleaks.tar.gz https://github.com/gitleaks/gitleaks/releases/latest/download/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz
+        sudo tar xf gitleaks.tar.gz -C /usr/local/bin gitleaks
+        gitLeaks=$(gitleaks version)
+        echo "gitleaks version: $gitLeaks"
+
+    - name: Run gitleaks
+      run: |
+        echo "Run Gitleaks and generate a JSON report"
+        gitleaks detect --source ${{github.workspace}} --report-format json --report-path gitleaks-report.json
+        echo "Gitleaks scan completed. Report saved as gitleaks-report.json"
+      shell: bash
+
+    - name: Upload gitleaks report
+      uses: actions/upload-artifact@v4
+      with:
+        name: gitleaks-report
+        path: gitleaks-report.json

@@ -1,0 +1,61 @@
+name: Terraform Workflow
+
+on:
+  workflow_call:
+    inputs:
+      tfversion:
+        required: true
+        type: string
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up tfenv
+      run: |
+        git clone https://github.com/tfutils/tfenv.git ~/.tfenv
+        echo 'export PATH="$HOME/.tfenv/bin:$PATH"' >> $GITHUB_ENV
+        echo 'export PATH="$HOME/.tfenv/bin:$PATH"' >> ~/.bashrc
+        source ~/.bashrc
+
+    - name: Setup terraform
+      run: |
+        tfenv install ${{ inputs.tfversion }}
+        tfenv use ${{ inputs.tfversion }}
+        terraform version
+
+    - name: terraform init
+      id: init
+      env: 
+        AWS_BUCKET_NAME: ${{ secrets.DEV_AWS_BUCKET_NAME }} 
+        AWS_BUCKET_KEY_NAME: ${{ secrets.DEV_AWS_BUCKET_KEY_NAME }}
+        AWS_DYNAMODB_TABLE: ${{ secrets.DEV_AWS_DYNAMODB_TABLE}}
+        AWS_REGION : ${{ secrets.AWS_REGION }}
+      run: |
+        terraform init -backend=true \
+          -backend-config="bucket=${AWS_BUCKET_NAME}" \
+          -backend-config="key=${AWS_BUCKET_KEY_NAME}" \
+          -backend-config="dynamodb_table=${AWS_DYNAMODB_TABLE}" \
+          -backend-config="region=${AWS_REGION}" \
+          -backend-config="encrypt=true"
+      if: github.ref == 'refs/heads/main'
+      continue-on-error: false
+
+    - name: terraform plan
+      id: plan
+      run: terraform plan -input=false -out plan
+      if: github.ref == 'refs/heads/main'
+      continue-on-error: false
+
+    - name: terraform apply
+      id: apply
+      run: terraform apply -auto-approve plan
+      continue-on-error: false

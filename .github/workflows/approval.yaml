@@ -1,0 +1,33 @@
+name: 'Terraform Workflow for manual approval'
+
+on:
+  workflow_call:
+    inputs:
+      approval_prompt:
+        required: true
+        type: string
+      timeout_in_minutes:
+        required: false
+        type: string
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  approval:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Display Approval Prompt
+      run: |
+        echo "${{ inputs.approval_prompt }}"
+        ./approval.sh
+
+    - name: Set Timeout
+      run: |
+        echo "Waiting for approval with a timeout of ${{ inputs.timeout_in_minutes }} minutes"
+        timeout $(( ${{ inputs.timeout_in_minutes }} * 60 )) ./approval.sh
