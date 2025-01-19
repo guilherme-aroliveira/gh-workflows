@@ -93,7 +93,7 @@ jobs:
     - name: Approval Prompt
       run: |
         while true; do 
-          REPOS=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/${{ inputs.github_user }}/repos" | jq -r '.[].name') 
+          REPOS=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/users/${{ inputs.github_user }}/repos" | jq -r '.[].name') 
             for REPO in $REPOS; do 
               WORKFLOWS=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "https://api.repos/${{ inputs.github_user }}/${{ inputs.repo }}/actions/runs" | jq -r '.workflow_runs[] | select(.status=="in_progress") | .id') 
               for RUN_ID in $WORKFLOWS; do 
