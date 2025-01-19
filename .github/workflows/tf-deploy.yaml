@@ -71,7 +71,7 @@ jobs:
       run: |
         terraform init -backend=true \
           -backend-config="bucket=${AWS_BUCKET_NAME}" \
-          -backend-config="key=${AWS_BUCKET_KEY_NAME}" \
+          -backend-config="key=${AWS_BUCKET_KEY}" \
           -backend-config="dynamodb_table=${AWS_DYNAMODB_TABLE}" \
           -backend-config="region=${AWS_REGION}" \
           -backend-config="encrypt=true"
