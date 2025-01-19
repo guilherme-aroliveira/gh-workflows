@@ -94,7 +94,7 @@ jobs:
       uses: actions/github-script@v6 
       with: 
         script: | 
-          const response = await github.actions.createWorkflowDispatch({ 
+          const response = await github.actions.createWorkflowCall({ 
             owner: context.repo.owner, 
             repo: context.repo.repo, 
             workflow_id: 'approval.yaml', 
