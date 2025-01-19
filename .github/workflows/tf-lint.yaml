@@ -17,14 +17,13 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Install dependencies 
-      run: sudo apt-get update && sudo apt-get install -y git
-
     - name: Set up tfenv
       run: |
         git clone https://github.com/tfutils/tfenv.git ~/.tfenv
-        echo 'export PATH="$HOME/.tfenv/bin:$PATH"' >> ~/.bashrc
-        source ~/.bashrc
+        ln -s ~/.tfenv/bin/* /usr/local/bin
+        mkdir -p ~/.local/bin/
+        . ~/.profile
+        ln -s ~/.tfenv/bin/* ~/.local/bin
         which tfenv
 
     - name: Setup terraform
