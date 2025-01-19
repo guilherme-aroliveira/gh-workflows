@@ -3,6 +3,9 @@ name: Terraform Workflow
 on:
   workflow_call:
     inputs:
+      working_directory:
+        required: true
+        type: string
       tfversion:
         required: true
         type: string
@@ -15,6 +18,18 @@ on:
       timeout_in_minutes:
         required: true
         type: string
+      aws_bucket_name:
+        required: true
+        type: string
+      aws_bucket_key:
+        required: true
+        type: string
+      aws_dynamodb_table:
+        required: true
+        type: string
+      aws_region:
+        required: true
+        type: string
 
 permissions:
   id-token: write
@@ -23,6 +38,9 @@ permissions:
 jobs:
   terraform:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ inputs.working_directory }}
 
     steps:
     - name: Checkout repository
@@ -46,10 +64,10 @@ jobs:
     - name: terraform init
       id: init
       env:
-        AWS_BUCKET_NAME: ${{ secrets.DEV_AWS_BUCKET_NAME }} 
-        AWS_BUCKET_KEY_NAME: ${{ secrets.DEV_AWS_BUCKET_KEY_NAME }}
-        AWS_DYNAMODB_TABLE: ${{ secrets.DEV_AWS_DYNAMODB_TABLE}}
-        AWS_REGION : ${{ secrets.AWS_REGION }}
+        AWS_BUCKET_NAME: ${{ inputs.aws_bucket_name }} 
+        AWS_BUCKET_KEY: ${{ inputs.aws_bucket_key }}
+        AWS_DYNAMODB_TABLE: ${{ inputs.aws_dynamodb_table }}
+        AWS_REGION : ${{ inputs.aws_region }}
       run: |
         terraform init -backend=true \
           -backend-config="bucket=${AWS_BUCKET_NAME}" \
