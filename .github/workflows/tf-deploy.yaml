@@ -90,16 +90,14 @@ jobs:
       if: github.ref == 'refs/heads/main'
       continue-on-error: false
 
-    - name: Await Manual Approval 
-      if: always() # Always run this step, even if previous steps fail. 
-      environment: approval 
-      run: echo "Please approve this step in the GitHub UI to continue." 
-      
-    - name: Continue if approved 
-      if: ${{ success() }} 
-      run: echo "Approval received. Continuing the workflow..."
+    - uses: trstringer/manual-approval@v1
+      with:
+        secret: ${{ github.TOKEN }}
+        approvers: guilherme-aroliveira
 
     - name: terraform apply
       id: apply
-      run: terraform apply -auto-approve plan
+      run: |
+        echo deploying
+        terraform apply -auto-approve plan
       continue-on-error: false
