@@ -20,9 +20,9 @@ jobs:
     - name: Set up tfenv
       run: |
         git clone https://github.com/tfutils/tfenv.git ~/.tfenv
-        echo 'export PATH="$HOME/.tfenv/bin:$PATH"' >> $GITHUB_ENV
         echo 'export PATH="$HOME/.tfenv/bin:$PATH"' >> ~/.bashrc
         source ~/.bashrc
+        which tfenv
 
     - name: Setup terraform
       run: |
