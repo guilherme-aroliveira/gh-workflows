@@ -18,18 +18,15 @@ on:
       timeout_in_minutes:
         required: true
         type: string
-      aws_bucket_name:
+    secrets:
+      AWS_BUCKET_NAME:
         required: true
-        type: string
-      aws_bucket_key:
+      AWS_BUCKET_KEY_NAME:
         required: true
-        type: string
-      aws_dynamodb_table:
+      AWS_DYNAMODB_TABLE:
         required: true
-        type: string
-      aws_region:
+      AWS_REGION:
         required: true
-        type: string
 
 permissions:
   id-token: write
