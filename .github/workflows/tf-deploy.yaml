@@ -30,10 +30,12 @@ jobs:
 
     - name: Set up tfenv
       run: |
-        git clone https://github.com/tfutils/tfenv.git ~/.tfenv
-        echo 'export PATH="$HOME/.tfenv/bin:$PATH"' >> $GITHUB_ENV
-        echo 'export PATH="$HOME/.tfenv/bin:$PATH"' >> ~/.bashrc
-        source ~/.bashrc
+        git clone --depth=1 https://github.com/tfutils/tfenv.git ~/.tfenv
+        ln -s ~/.tfenv/bin/* /usr/local/bin
+        mkdir -p ~/.local/bin/
+        . ~/.profile
+        ln -s ~/.tfenv/bin/* ~/.local/bin
+        which tfenv
 
     - name: Setup terraform
       run: |
@@ -43,7 +45,7 @@ jobs:
 
     - name: terraform init
       id: init
-      env: 
+      env:
         AWS_BUCKET_NAME: ${{ secrets.DEV_AWS_BUCKET_NAME }} 
         AWS_BUCKET_KEY_NAME: ${{ secrets.DEV_AWS_BUCKET_KEY_NAME }}
         AWS_DYNAMODB_TABLE: ${{ secrets.DEV_AWS_DYNAMODB_TABLE}}
