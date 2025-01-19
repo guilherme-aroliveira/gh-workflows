@@ -90,17 +90,14 @@ jobs:
       if: github.ref == 'refs/heads/main'
       continue-on-error: false
 
-    - name: Request Approval 
-      uses: actions/github-script@v6 
-      with: 
-        script: | 
-          const response = await github.actions.createWorkflowCall({ 
-            owner: context.repo.owner, 
-            repo: context.repo.repo, 
-            workflow_id: 'approval.yaml', 
-            ref: context.ref, 
-          }); 
-          console.log(response); 
+    - name: Await Manual Approval 
+      if: always() # Always run this step, even if previous steps fail. 
+      environment: approval 
+      run: echo "Please approve this step in the GitHub UI to continue." 
+      
+    - name: Continue if approved 
+      if: ${{ success() }} 
+      run: echo "Approval received. Continuing the workflow..."
 
     - name: terraform apply
       id: apply
