@@ -1,0 +1,26 @@
+name: Approval Step
+
+on:
+  workflow_run:
+    workflows: ["Terraform Workflow"]
+    types:
+      - requested
+
+jobs:
+  approval:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Manual Approval
+        run: echo "Waiting for manual approval..."
+
+      - name: Await Approval
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const response = await github.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'continue.yaml',
+              ref: context.ref,
+            });
+            console.log(response);
