@@ -3,7 +3,12 @@ name: 'Terraform Lint'
 on:
   workflow_call:
     inputs:
+      working_directory:
+        description: "Path of the working directory"
+        required: true
+        type: string
       tfversion:
+        description: "Version of terraform to install"
         required: true
         type: string
 
@@ -11,6 +16,9 @@ jobs:
   ci:
     name: integration
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ inputs.working_directory }}
     
     steps:
 

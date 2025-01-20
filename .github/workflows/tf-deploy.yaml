@@ -3,19 +3,16 @@ name: Terraform Workflow
 on:
   workflow_call:
     inputs:
+      environment:
+        description: "Name of the environment to deploy"
+        required: true
+        type: string
       working_directory:
+        description: "Path of the working directory"
         required: true
         type: string
       tfversion:
-        required: true
-        type: string
-      github_user:
-        required: true
-        type: string
-      repo:
-        required: true
-        type: string
-      timeout_in_minutes:
+        description: "Version of terraform to install"
         required: true
         type: string
     secrets:
@@ -44,6 +41,7 @@ permissions:
 jobs:
   terraform:
     runs-on: ubuntu-latest
+    environment: ${{inputs.environment}}
     defaults:
       run:
         working-directory: ${{ inputs.working_directory }}
@@ -89,12 +87,6 @@ jobs:
       run: terraform plan -input=false -out plan
       if: github.ref == 'refs/heads/main'
       continue-on-error: false
-
-    - name: Wait for approval
-      uses: trstringer/manual-approval@v1
-      with:
-        secret: ${{ secrets.GITHUB_TOKEN }}
-        approvers: guilherme-aroliveira
 
     - name: terraform apply
       id: apply
