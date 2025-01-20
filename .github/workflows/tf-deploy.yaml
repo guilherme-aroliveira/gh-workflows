@@ -41,7 +41,7 @@ permissions:
 jobs:
   terraform:
     runs-on: ubuntu-latest
-    environment: ${{inputs.environment}}
+    environment: ${{ inputs.environment }}
     defaults:
       run:
         working-directory: ${{ inputs.working_directory }}
