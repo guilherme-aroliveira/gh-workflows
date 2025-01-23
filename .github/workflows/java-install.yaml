@@ -1,0 +1,26 @@
+name: Install Java
+
+on:
+  workflow_call:
+    inputs:
+      jdk_version:
+        description: 'The version of JDK to install'
+        required: true
+        type: string
+
+jobs:
+
+  jdk:
+    name: Set up Java
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install JDK
+      run: |
+        sudo apt-get update
+        sudo apt-get openjdk-${{ inputs.jdk_version }}-jdk
+        echo "Check for JDK version:" | java -version 

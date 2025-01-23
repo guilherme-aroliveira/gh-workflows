@@ -3,10 +3,10 @@ name: Terraform Workflow
 on:
   workflow_call:
     inputs:
-      environment:
-        description: "Name of the environment to deploy"
-        required: true
-        type: string
+      #environment:
+      #  description: "Name of the environment to deploy"
+      #  required: true
+      #  type: string
       working_directory:
         description: "Path of the working directory"
         required: true
@@ -41,7 +41,7 @@ permissions:
 jobs:
   terraform:
     runs-on: ubuntu-latest
-    environment: ${{ inputs.environment }}
+    #environment: ${{ inputs.environment }}
     defaults:
       run:
         working-directory: ${{ inputs.working_directory }}

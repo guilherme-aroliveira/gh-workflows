@@ -1,0 +1,47 @@
+name: 'Kubernetes Deploy'
+
+on:
+  workflow_call:
+    inputs:
+      aws_region:
+        required: true
+        type: string
+      cluster-env:
+        required: true
+        type: string
+      ecr-repo-url:
+        required: true
+        type: string
+      namespace:
+        required: true
+        type: string
+      chart-name:
+        required: true
+        type: string
+      chart-version:
+        required: true
+        type: string
+
+jobs:
+
+  ecr-push:
+    name: ECR 
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install Helm
+      run: |
+        curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 > get_helm.sh
+        chmod 700 get_helm.sh
+        ./get_helm.sh
+
+    - name: Install the Helm chart
+      run: |
+        aws eks update-kubeconfig --name eks-${{ inputs.cluster-env }}-cluster --region ${{ inputs.aws_region }}
+        helm install ${{ inputs.chart-name }} ${{ inputs. ecr-repo-url }}/${{ inputs.chart-name}} --version ${{ inputs.chart-version }}s
+        echo "Check the installation"
+        helm list -n ${{ inputs.namespace }}

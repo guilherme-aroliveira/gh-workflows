@@ -7,7 +7,7 @@ on:
         description: "Path of the working directory"
         required: true
         type: string
-      tfversion:
+      tf_version:
         description: "Version of terraform to install"
         required: true
         type: string
@@ -19,8 +19,13 @@ jobs:
     defaults:
       run:
         working-directory: ${{ inputs.working_directory }}
-    
+
     steps:
+
+    - name: Initiale repository
+      run: |
+        git config --global init.defaultBranch main
+        git config --global advice.detachedHead false
 
     - name: Checkout repository
       uses: actions/checkout@v4
@@ -32,21 +37,21 @@ jobs:
         mkdir -p ~/.local/bin/
         . ~/.profile
         ln -s ~/.tfenv/bin/* ~/.local/bin
-        which tfenv
+        echo "tvenf location $(which tfenv)"
+        echo "tfenv version $(tfenv --version)"
 
     - name: Setup terraform
       run: |
-        tfenv install ${{ inputs.tfversion }}
-        tfenv use ${{ inputs.tfversion }}
-        terraform version
+        tfenv install ${{ inputs.tf_version }}
+        tfenv use ${{ inputs.tf_version }}
 
     - name: Terraform - Lint and Validate
-      run: terraform version
+      run: echo "Terraform version $(terraform version)"
     
-    - name: init
+    - name: Run 'terraform init'
       run: terraform init -backend=false
 
-    - name: validate
+    - name: Run 'terraform validate'
       run: terraform validate
 
     - name: check format / lint

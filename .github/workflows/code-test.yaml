@@ -1,0 +1,44 @@
+name: SonarQube Workflow
+
+on:
+  workflow_call:
+    inputs:
+      sonarqube_version:
+        required: true
+        type: string
+      project_key:
+        required: true
+        type: string
+      organization:
+        required: true
+        type: string
+
+jobs:
+
+  sonarqube:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install prerequisites
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y openjdk-11-jdk unzip wget
+
+    - name: Download SonarQube
+      run: |
+        wget https://binaries.sonarsource.com/Distribution/sonarqube/sonarqube-${{ inputs.sonarqube_version }}.zip
+        unzip sonarqube-${{ inputs.sonarqube_version }}.zip -d $HOME
+
+    - name: Start SonarQube
+      run: |
+        $HOME/sonarqube-${{ inputs.sonarqube_version }}/bin/linux-x86-64/sonar.sh start
+
+    - name: Configure SonarQube
+      run: |
+        sonar-scanner \
+        -Dsonar.projectKey=${{ inputs.project_key }} \
+        -Dsonar.organization=${{ inputs.organization }} \
+        -Dsonar.host.url=http://localhost:9000

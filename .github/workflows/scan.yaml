@@ -9,7 +9,12 @@ jobs:
     name: gitleaks
     runs-on: ubuntu-latest
 
-    steps: 
+    steps:
+
+    - name: Initiale repository
+      run: |
+        git config --global init.defaultBranch main
+        git config --global advice.detachedHead false
 
     - name: Checkout code
       uses: actions/checkout@v4
@@ -28,7 +33,6 @@ jobs:
         echo "Run Gitleaks and generate a JSON report"
         gitleaks detect --source ${{github.workspace}} --report-format json --report-path gitleaks-report.json
         echo "Gitleaks scan completed. Report saved as gitleaks-report.json"
-      shell: bash
 
     - name: Upload gitleaks report
       uses: actions/upload-artifact@v4

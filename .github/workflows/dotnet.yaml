@@ -1,0 +1,25 @@
+name: 'Install and Run .NET Action'
+
+on:
+  workflow_call: 
+    inputs:
+      dotnet_version:
+        description: 'The version of .NET to install'
+        required: true
+        type: string
+
+jobs:
+  dot-net:
+    name: .NET
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Install .NET CLI
+      run: |
+        sudo apt-get update
+        wget https://dot.net/v1/dotnet-install.sh -O dotnet-install.sh
+        chmod +x dotnet-install.sh
+        ./dotnet-install.sh --version ${{ inputs.dotnet_version }}
+        echo 'export PATH="$HOME/.dotnet:$PATH"' >> $GITHUB_ENV
+        echo 'export PATH="$HOME/.dotnet:$PATH"' >> ~/.bashrc
+        source ~/.bashrc
