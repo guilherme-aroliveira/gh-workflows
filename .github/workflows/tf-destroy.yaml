@@ -11,28 +11,22 @@ on:
         description: "Version of terraform to install"
         required: true
         type: string
+    secrets:
       #access_role:
       #  required: true
       #  type: string
       aws_access_key_id:
         required: true
-        type: string
       aws_secret_access_key:
         required: true
-        type: string
       aws_region:
         required: true
-        type: string
       aws_bucket_name:
         required: true
-        type: string
       aws_bucket_key:
         required: true
-        type: string
       aws_dynamodb_table:
         required: true
-        type: string
-
 env:
   aws_region: ${{ secrets.AWS_REGION }}
   aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
