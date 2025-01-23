@@ -7,14 +7,9 @@ jobs:
 
   scan: 
     name: gitleaks
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
-
-    - name: Initiale repository
-      run: |
-        git config --global init.defaultBranch main
-        git config --global advice.detachedHead false
 
     - name: Checkout code
       uses: actions/checkout@v4
