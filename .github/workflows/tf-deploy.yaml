@@ -3,15 +3,11 @@ name: Terraform Workflow
 on:
   workflow_call:
     inputs:
-      #environment:
-      #  description: "Name of the environment to deploy"
-      #  required: true
-      #  type: string
       working_directory:
         description: "Path of the working directory"
         required: true
         type: string
-      tfversion:
+      tf_version:
         description: "Version of terraform to install"
         required: true
         type: string
@@ -41,7 +37,6 @@ permissions:
 jobs:
   terraform:
     runs-on: ubuntu-latest
-    #environment: ${{ inputs.environment }}
     defaults:
       run:
         working-directory: ${{ inputs.working_directory }}
@@ -57,27 +52,27 @@ jobs:
         mkdir -p ~/.local/bin/
         . ~/.profile
         ln -s ~/.tfenv/bin/* ~/.local/bin
-        which tfenv
+        echo "tvenf location $(which tfenv)"
+        echo "tfenv version $(tfenv --version)"
 
     - name: Setup terraform
       run: |
-        tfenv install ${{ inputs.tfversion }}
-        tfenv use ${{ inputs.tfversion }}
-        terraform version
+        tfenv install ${{ inputs.tf_version }}
+        tfenv use ${{ inputs.tf_version }}
+        echo "Terraform version $(terraform version)"
 
     - name: terraform init
       id: init
       env:
-        AWS_BUCKET_NAME: ${{ secrets.AWS_BUCKET_NAME }} 
-        AWS_BUCKET_KEY: ${{ secrets.AWS_BUCKET_KEY_NAME }}
-        AWS_DYNAMODB_TABLE: ${{ secrets.AWS_DYNAMODB_TABLE }}
-        AWS_REGION: ${{ secrets.AWS_REGION }}
+        aws_bucket_name: ${{ secrets.AWS_BUCKET_NAME }} 
+        aws_bucket_key: ${{ secrets.AWS_BUCKET_KEY_NAME }}
+        aws_dynamodb_table: ${{ secrets.AWS_DYNAMODB_TABLE }}
       run: |
         terraform init -backend=true \
-          -backend-config="bucket=${AWS_BUCKET_NAME}" \
-          -backend-config="key=${AWS_BUCKET_KEY}" \
-          -backend-config="dynamodb_table=${AWS_DYNAMODB_TABLE}" \
-          -backend-config="region=${AWS_REGION}" \
+          -backend-config="bucket=${aws_bucket_name}" \
+          -backend-config="key=${aws_bucket_key}" \
+          -backend-config="dynamodb_table=${aws_dynamodb_table}" \
+          -backend-config="region=${aws_region}" \
           -backend-config="encrypt=true"
       if: github.ref == 'refs/heads/main'
       continue-on-error: false

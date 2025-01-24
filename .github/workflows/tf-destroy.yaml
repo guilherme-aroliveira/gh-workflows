@@ -63,7 +63,6 @@ jobs:
 
     - name: Run 'terraform init'
       env:
-        #aws_region: ${{ secrets.AWS_REGION }}
         aws_bucket_name: ${{ secrets.AWS_BUCKET_NAME }} 
         aws_bucket_key: ${{ secrets.AWS_BUCKET_KEY_NAME }}
         aws_dynamodb_table: ${{ secrets.AWS_DYNAMODB_TABLE }}

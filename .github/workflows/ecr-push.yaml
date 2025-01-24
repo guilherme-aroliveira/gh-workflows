@@ -3,26 +3,23 @@ name: 'ECR Push'
 on:
   workflow_call:
     inputs:
-      jdk_version:
+      working_directory:
         required: true
         type: string
-      ecr_repository:
+      jdk_version:
         required: true
         type: string
       image_tag: 
         required: true
         type: string
-      aws_region:
-        required: true
-        type: string
-      authToken:
-        required: true
-        type: string
-      role_to_assume:
-        required: true
-        type: string
     secrets:
-      ACTIONS_ID_TOKEN_REQUEST_TOKEN:
+      AWS_REGION: 
+        required: true
+      AWS_ACCOUNT_ID:
+        required: true
+      ROLE_TO_ASSUME:
+        required: true
+      ECR_REPOSITORY:
         required: true
 
 jobs:
@@ -30,6 +27,9 @@ jobs:
   ecr-push:
     name: ECR 
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ inputs.working_directory }}
 
     steps:
 
@@ -49,29 +49,29 @@ jobs:
 
     - name: Configure AWS CLI
       run: |
-        aws configure set region ${{ inputs.aws_region }}
-      shell: bash
+        aws configure set region ${{ secrets.AWS_REGION }}
 
-    - name: Assume Role with GitHub OIDC
-      id: assume-role
-      run: |
-        ROLE=$(aws sts assume-role-with-web-identity --role-arn ${{ inputs.role_to_assume }} --role-session-name GitHubActions --web-identity-token ${{ secrets.ACTIONS_ID_TOKEN_REQUEST_TOKEN }} --duration-seconds 3600)
-        echo "AWS_SESSION_TOKEN=$(echo $ROLE | jq -r '.Credentials.SessionToken')" >> $GITHUB_ENV
+    - name: Configure aws credentials
+      uses: aws-actions/configure-aws-credentials@v1.7.0
+      with:
+        role-to-assume: ${{ secrets.ROLE_TO_ASSUME }}
+        aws-region: ${{ secrets.AWS_REGION }}
 
     - name: Login to AWS ECR
       run: |
-        aws ecr get-login-password --region ${{ inputs.aws_region }} | docker login --username AWS --password-stdin ${{ inputs.ecr_repository }}
-
-    - name: Authenticate do Github Packages
-      run: |
-        echo "" > .npmrc
-        echo "@waycarbon:registry=https://npm.pkg.github.com" >> .npmrc
-        echo "//npm.pkg.github.com/:_${{ inputs.authToken }}" >> .npmrc
+        aws ecr get-login-password \ 
+          --region ${{ secrets.AWS_REGION }} | docker login \
+          --username AWS \
+          --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
 
     - name: Build Docker Image
       run: |
-        docker build -t ${{ inputs.ecr_repository }}:${{ inputs.image_tag }} .
+        docker build -t ${{ inputs.image_tag }} .
+
+    - name: Tag Docker Image
+      run: |
+        docker tag ${{ inputs.image_tag }} ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY }}:${{ inputs.image_tag }}
 
     - name: Push Docker Image to ECR
       run: |
-        docker push ${{ inputs.ecr_repository }}:${{ inputs.image_tag }}
+        docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY }}:${{ inputs.image_tag }}

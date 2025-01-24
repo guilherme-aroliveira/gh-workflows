@@ -3,30 +3,39 @@ name: 'Kubernetes Deploy'
 on:
   workflow_call:
     inputs:
-      aws_region:
+      working_directory:
         required: true
         type: string
-      cluster-env:
-        required: true
-        type: string
-      ecr-repo-url:
+      cluster_env:
         required: true
         type: string
       namespace:
         required: true
         type: string
-      chart-name:
+      chart_name:
         required: true
         type: string
-      chart-version:
+      chart_version:
         required: true
         type: string
+    secrets:
+      AWS_ACCOUNT_ID:
+        required: true
+      AWS_REGION:
+        required: true
+      ECR_REPOSITORY:
+        required: true
+      ROLE_TO_ASSUME:
+        required: true
 
 jobs:
 
   ecr-push:
     name: ECR 
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ inputs.working_directory }}
 
     steps:
 
@@ -39,9 +48,30 @@ jobs:
         chmod 700 get_helm.sh
         ./get_helm.sh
 
+    - name: Package the chart
+      run:
+        helm package ${{ inputs.chart_name }}
+
+    - name: Login to AWS ECR
+      run: |
+        aws ecr get-login-password \
+          --region ${{ secrets.AWS_REGION }} | helm registry login \
+          --username AWS \
+          --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
+
+    - name: Push the Helm chart
+      run: helm push ${{ inputs.chart_name }}-${{ inputs.chart_version }}.tgz oci://${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/
+
+    - name: Describe the Helm chart
+      run: |
+        aws ecr describe-images \
+          --repository-name ${{ secrets.ECR_REPOSITORY }} \
+          --region ${{ secrets.AWS_REGION }}
+
     - name: Install the Helm chart
       run: |
-        aws eks update-kubeconfig --name eks-${{ inputs.cluster-env }}-cluster --region ${{ inputs.aws_region }}
-        helm install ${{ inputs.chart-name }} ${{ inputs. ecr-repo-url }}/${{ inputs.chart-name}} --version ${{ inputs.chart-version }}s
+        aws eks update-kubeconfig --name eks-${{ inputs.cluster_env }}-cluster --region ${{ secrets.AWS_REGION }}
+        helm install ${{ inputs.chart_name }} oci://${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ inputs.chart_name}} \ 
+          --version ${{ inputs.chart_version }}
         echo "Check the installation"
         helm list -n ${{ inputs.namespace }}
