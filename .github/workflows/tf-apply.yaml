@@ -1,4 +1,4 @@
-name: Terraform Workflow
+name: Terraform Apply
 
 on:
   workflow_call:
@@ -12,24 +12,21 @@ on:
         required: true
         type: string
     secrets:
-      AWS_BUCKET_NAME:
-        required: true
-      AWS_BUCKET_KEY_NAME:
-        required: true
-      AWS_DYNAMODB_TABLE:
+      ASSUME_ROLE:
         required: true
       AWS_REGION:
         required: true
-      AWS_ACCESS_KEY_ID:
+      AWS_BUCKET_NAME:
         required: true
-      AWS_SECRET_ACCESS_KEY:
-        required: true 
+      AWS_BUCKET_KEY:
+        required: true
+      AWS_DYNAMODB_TABLE:
+        required: true
 
 env:
+  ASSUME_ROLE: ${{ secrets.ASSUME_ROLE }}
   AWS_REGION: ${{ secrets.AWS_REGION }}
-  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-
+  
 permissions:
   id-token: write
   contents: read
@@ -65,7 +62,7 @@ jobs:
       id: init
       env:
         aws_bucket_name: ${{ secrets.AWS_BUCKET_NAME }} 
-        aws_bucket_key: ${{ secrets.AWS_BUCKET_KEY_NAME }}
+        aws_bucket_key: ${{ secrets.AWS_BUCKET_KEY }}
         aws_dynamodb_table: ${{ secrets.AWS_DYNAMODB_TABLE }}
       run: |
         terraform init -backend=true \

@@ -23,4 +23,4 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get openjdk-${{ inputs.jdk_version }}-jdk
-        echo "Check for JDK version:" | java -version 
+        echo "Check for JDK version:" | java -version
