@@ -24,8 +24,8 @@ on:
         required: true
 
 env:
-  ASSUME_ROLE: ${{ secrets.ASSUME_ROLE }}
-  AWS_REGION: ${{ secrets.AWS_REGION }}
+  assume_role: ${{ secrets.ASSUME_ROLE }}
+  aws_region: ${{ secrets.AWS_REGION }}
 
 permissions:
   id-token: write
@@ -57,6 +57,14 @@ jobs:
         tfenv install ${{ inputs.tf_version }}
         tfenv use ${{ inputs.tf_version }}
         echo "Terraform version $(terraform version)"
+        
+    - name: Configure AWS credentials 
+      id: configure_aws_credentials 
+      uses: aws-actions/configure-aws-credentials@v4 
+      with:
+        role-to-assume: ${{ env.assume_role }}
+        role-session-name: github-actions-federation
+        aws-region: ${{ env.aws_region }}
 
     - name: terraform init
       id: init
