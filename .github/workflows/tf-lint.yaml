@@ -23,7 +23,7 @@ jobs:
     steps:
 
     - name: Checkout repository
-      uses: ./.github/workflows/checkout.yaml
+      uses: actions/checkout@v4
 
     - name: Set up tfenv
       run: |

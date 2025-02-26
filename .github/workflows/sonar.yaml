@@ -20,7 +20,7 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: ./.github/workflows/checkout.yaml
+      uses: actions/checkout@v4
 
     - name: Install prerequisites
       uses: ./.github/workflows/jdk.yaml
