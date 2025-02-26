@@ -12,11 +12,9 @@ on:
         required: true
         type: string
     secrets:
+      ASSUME_ROLE:
+        required: true
       AWS_REGION:
-        required: true
-      AWS_ACCESS_KEY_ID:
-        required: true
-      AWS_SECRET_ACCESS_KEY:
         required: true
       AWS_BUCKET_NAME:
         required: true
@@ -43,7 +41,7 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v4
+      uses: ./.github/workflows/checkout.yaml
 
     - name: Set up tfenv
       run: |

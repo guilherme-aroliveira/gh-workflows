@@ -40,7 +40,7 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v4
+      uses: ./.github/workflows/checkout.yaml
 
     - name: Set up tfenv
       run: |
@@ -57,7 +57,7 @@ jobs:
         tfenv install ${{ inputs.tf_version }}
         tfenv use ${{ inputs.tf_version }}
         echo "Terraform version $(terraform version)"
-        
+
     - name: Configure AWS credentials 
       id: configure_aws_credentials 
       uses: aws-actions/configure-aws-credentials@v4 

@@ -34,13 +34,12 @@ jobs:
     steps:
 
     - name: Checkout code
-      uses: actions/checkout@v4
-
+      uses: ./.github/workflows/checkout.yaml
+      
     - name: Set up Java
-      run: |
-        sudo apt-get update
-        sudo apt-get openjdk-${{ inputs.jdk_version }}-jdk
-        echo "Check for JDK version:" | java -version
+      uses: ./.github/workflows/jdk.yaml
+      with:
+        jdk_version: ${{ inputs.jdk_version }}
 
     - name: Install AWS CLI
       run: |
