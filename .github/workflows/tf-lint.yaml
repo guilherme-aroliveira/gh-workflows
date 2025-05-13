@@ -42,7 +42,7 @@ jobs:
 
     - name: Terraform - Lint and Validate
       run: echo "Terraform version $(terraform version)"
-    
+
     - name: Run 'terraform init'
       run: terraform init -backend=false
 

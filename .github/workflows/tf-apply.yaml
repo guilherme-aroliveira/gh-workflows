@@ -20,12 +20,8 @@ on:
         required: true
       AWS_BUCKET_KEY:
         required: true
-      AWS_DYNAMODB_TABLE:
+      S3_LOCK:
         required: true
-
-env:
-  ASSUME_ROLE: ${{ secrets.ASSUME_ROLE }}
-  AWS_REGION: ${{ secrets.AWS_REGION }}
   
 permissions:
   id-token: write
@@ -58,17 +54,17 @@ jobs:
         tfenv use ${{ inputs.tf_version }}
         echo "Terraform version $(terraform version)"
 
-    - name: terraform init
-      id: init
+    - name: Run "terraform init"
       env:
+        aws-region: ${{ secrets.AWS_REGION }}
         aws_bucket_name: ${{ secrets.AWS_BUCKET_NAME }} 
         aws_bucket_key: ${{ secrets.AWS_BUCKET_KEY }}
-        aws_dynamodb_table: ${{ secrets.AWS_DYNAMODB_TABLE }}
+        s3_locking: ${{ secrets.S3_LOCK }}
       run: |
         terraform init -backend=true \
           -backend-config="bucket=${aws_bucket_name}" \
           -backend-config="key=${aws_bucket_key}" \
-          -backend-config="dynamodb_table=${aws_dynamodb_table}" \
+          -backend-config="use_lockfile=${s3_locking}" \
           -backend-config="region=${aws_region}" \
           -backend-config="encrypt=true"
       if: github.ref == 'refs/heads/main'
@@ -80,7 +76,7 @@ jobs:
       if: github.ref == 'refs/heads/main'
       continue-on-error: false
 
-    - name: terraform apply
+    - name: Run "terraform apply"
       id: apply
       run: |
         echo deploying

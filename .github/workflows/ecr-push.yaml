@@ -3,13 +3,8 @@ name: 'ECR Push'
 on:
   workflow_call:
     inputs:
-      working_directory:
-        required: true
-        type: string
       jdk_version:
-        required: true
-        type: string
-      image_tag: 
+        description: 'The version of JDK to install'
         required: true
         type: string
     secrets:
@@ -27,35 +22,34 @@ jobs:
   ecr-push:
     name: ECR 
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ${{ inputs.working_directory }}
 
     steps:
 
     - name: Checkout code
       uses: actions/checkout@v4
       
-    - name: Set up Java
-      uses: ./.github/workflows/jdk.yaml
-      with:
-        jdk_version: ${{ inputs.jdk_version }}
+    - name: Install JDK
+      run: |
+        sudo apt-get update
+        sudo apt-get openjdk-${{ inputs.jdk_version }}-jdk
+        echo "Check for JDK version:" | java -version
 
     - name: Install AWS CLI
       run: |
         sudo apt-get update
-        sudo apt-get install -y awscli
-
-    - name: Configure AWS CLI
-      run: |
-        aws configure set region ${{ secrets.AWS_REGION }}
+        sudo apt-get install -y curl 
+        curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+        unzip awscliv2.zip   
+        sudo ./aws/install --update
+        aws --version
 
     - name: Configure aws credentials
-      uses: aws-actions/configure-aws-credentials@v1.7.0
-      with:
-        role-to-assume: ${{ secrets.ROLE_TO_ASSUME }}
-        aws-region: ${{ secrets.AWS_REGION }}
-
+      run: |
+        export TEMP_CREDS=$(aws sts assume-role --role-arn ${{ secrets.ROLE_TO_ASSUME }} --role-session-name "GitHubActionsSession")
+        export AWS_ACCESS_KEY_ID=$(echo $TEMP_CREDS | jq -r '.Credentials.AccessKeyId')
+        export AWS_SECRET_ACCESS_KEY=$(echo $TEMP_CREDS | jq -r '.Credentials.SecretAccessKey')
+        export AWS_SESSION_TOKEN=$(echo $TEMP_CREDS | jq -r '.Credentials.SessionToken')
+    
     - name: Login to AWS ECR
       run: |
         aws ecr get-login-password \ 
@@ -65,12 +59,15 @@ jobs:
 
     - name: Build Docker Image
       run: |
-        docker build -t ${{ inputs.image_tag }} .
+        REPOSITORY_URI = ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY }}
+        docker build -t $REPOSITORY_URI:/latest .
 
     - name: Tag Docker Image
       run: |
-        docker tag ${{ inputs.image_tag }} ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY }}:${{ inputs.image_tag }}
+        REPOSITORY_URI = ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY }}
+        docker tag $REPOSITORY_URI:latest
 
     - name: Push Docker Image to ECR
       run: |
-        docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY }}:${{ inputs.image_tag }}
+        REPOSITORY_URI = ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY }}
+        docker push $REPOSITORY_URI:latest

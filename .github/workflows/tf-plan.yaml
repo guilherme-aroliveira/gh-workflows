@@ -20,15 +20,11 @@ on:
         required: true
       AWS_BUCKET_KEY:
         required: true
-      AWS_DYNAMODB_TABLE:
+      S3_LOCK:
         required: true
 
-env:
-  assume_role: ${{ secrets.ASSUME_ROLE }}
-  aws_region: ${{ secrets.AWS_REGION }}
-
 permissions:
-  id-token: write
+  id-token: none
   contents: read
 
 jobs:
@@ -58,31 +54,23 @@ jobs:
         tfenv use ${{ inputs.tf_version }}
         echo "Terraform version $(terraform version)"
 
-    - name: Configure AWS credentials 
-      id: configure_aws_credentials 
-      uses: aws-actions/configure-aws-credentials@v4 
-      with:
-        role-to-assume: ${{ env.assume_role }}
-        role-session-name: github-actions-federation
-        aws-region: ${{ env.aws_region }}
-
-    - name: terraform init
-      id: init
+    - name: Run "terraform init"
       env:
+        aws-region: ${{ secrets.AWS_REGION }}
         aws_bucket_name: ${{ secrets.AWS_BUCKET_NAME }} 
         aws_bucket_key: ${{ secrets.AWS_BUCKET_KEY }}
-        aws_dynamodb_table: ${{ secrets.AWS_DYNAMODB_TABLE }}
+        s3_locking: ${{ secrets.S3_LOCK }}
       run: |
         terraform init -backend=true \
           -backend-config="bucket=${aws_bucket_name}" \
           -backend-config="key=${aws_bucket_key}" \
-          -backend-config="dynamodb_table=${aws_dynamodb_table}" \
+          -backend-config="use_lockfile=${s3_locking}" \
           -backend-config="region=${aws_region}" \
           -backend-config="encrypt=true"
       if: github.ref == 'refs/heads/main'
       continue-on-error: false
 
-    - name: terraform plan
+    - name: Run "terraform plan"
       id: plan
       run: terraform plan -input=false
       if: github.ref == 'refs/heads/main'

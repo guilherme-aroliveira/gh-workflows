@@ -1,0 +1,47 @@
+name: 'Helm Deploy to EKS'
+
+on:
+  workflow_call:
+    inputs:
+      app:
+        description: "Name of the app"
+        required: true
+        type: string
+
+jobs:
+
+  ecr-push:
+    name: ECR 
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup kubectl
+      run: |
+        sudo apt-get update
+        curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+        curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl.sha256"
+        echo "$(cat kubectl.sha256)  kubectl" | sha256sum --check
+        chmod +x kubectl
+        mkdir -p ~/.local/bin
+        mv ./kubectl ~/.local/bin/kubectl
+        echo "kubectl version: $(kubectl version --client)"
+
+    - name: Install Helm
+      run: |
+        curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 > get_helm.sh
+        chmod 700 get_helm.sh
+        ./get_helm.sh
+      
+    - name: Lint Helm Chart
+      run: |
+        helm lint ./helm-apps/${{ inputs.app }}
+      continue-on-error: false
+
+    - name: Check template
+      run: |
+        helm template ./helm-apps/${{ inputs.app }} --debug
+      continue-on-error: false

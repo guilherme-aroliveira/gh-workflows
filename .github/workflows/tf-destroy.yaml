@@ -18,15 +18,10 @@ on:
         required: true
       AWS_BUCKET_NAME:
         required: true
-      AWS_BUCKET_KEY_NAME:
+      AWS_BUCKET_KEY:
         required: true
-      AWS_DYNAMODB_TABLE:
+      S3_LOCK:
         required: true
-
-env:
-  AWS_REGION: ${{ secrets.AWS_REGION }}
-  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
 permissions:
   id-token: write
@@ -59,22 +54,23 @@ jobs:
         tfenv use ${{ inputs.tf_version }}
         echo "Terraform version $(terraform version)"
 
-    - name: Run 'terraform init'
+    - name: Run "terraform init"
       env:
+        aws-region: ${{ secrets.AWS_REGION }}
         aws_bucket_name: ${{ secrets.AWS_BUCKET_NAME }} 
-        aws_bucket_key: ${{ secrets.AWS_BUCKET_KEY_NAME }}
-        aws_dynamodb_table: ${{ secrets.AWS_DYNAMODB_TABLE }}
+        aws_bucket_key: ${{ secrets.AWS_BUCKET_KEY }}
+        s3_locking: ${{ secrets.S3_LOCK }}
       run: |
         terraform init -backend=true \
           -backend-config="bucket=${aws_bucket_name}" \
           -backend-config="key=${aws_bucket_key}" \
-          -backend-config="dynamodb_table=${aws_dynamodb_table}" \
+          -backend-config="use_lockfile=${s3_locking}" \
           -backend-config="region=${aws_region}" \
           -backend-config="encrypt=true"
       if: github.ref == 'refs/heads/main'
       continue-on-error: false
 
-    - name: Terraform Destroy 
+    - name: Run "terraform destroy"
       if: github.ref == 'refs/heads/main'
       run: terraform destroy -auto-approve
       continue-on-error: false
