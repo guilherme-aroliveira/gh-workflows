@@ -7,6 +7,17 @@ on:
         description: 'The version of JDK to install'
         required: true
         type: string
+      repository:
+        description: "ECR repository to use"
+        required: true
+        type: string
+      image_tag:
+        description: "Tag for the docker image"
+        required: true
+        type: string
+      folder_name:
+        required: true
+        type: string      
     secrets:
       AWS_REGION: 
         required: true
@@ -58,16 +69,19 @@ jobs:
           --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
 
     - name: Build Docker Image
+      env:
+        REPOSITORY_URI: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ inputs.repository }}
       run: |
-        REPOSITORY_URI = ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY }}
-        docker build -t $REPOSITORY_URI:/latest .
-
+        docker build -t ${{ inputs.image_tag }} ${{ inputs.folder_name }}
+    
     - name: Tag Docker Image
+      env:
+        REPOSITORY_URI: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ inputs.repository }}
       run: |
-        REPOSITORY_URI = ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY }}
-        docker tag $REPOSITORY_URI:latest
-
+        docker tag ${{ inputs.image_tag }} $REPOSITORY_URI:${{ inputs.image_tag }}
+    
     - name: Push Docker Image to ECR
+      env:
+        REPOSITORY_URI: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ inputs.repository }}
       run: |
-        REPOSITORY_URI = ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY }}
-        docker push $REPOSITORY_URI:latest
+        docker push $REPOSITORY_URI:${{ inputs.image_tag }}
