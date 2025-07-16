@@ -12,7 +12,7 @@ on:
         required: true
         type: string
     secrets:
-      ASSUME_ROLE:
+      AWS_ASSUME_ROLE:
         required: true
       AWS_REGION:
         required: true

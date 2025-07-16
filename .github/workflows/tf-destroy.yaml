@@ -12,7 +12,7 @@ on:
         required: true
         type: string
     secrets:
-      ASSUME_ROLE:
+      AWS_ASSUME_ROLE:
         required: true
       AWS_REGION:
         required: true
@@ -49,6 +49,16 @@ jobs:
         tfenv install ${{ inputs.tf_version }}
         tfenv use ${{ inputs.tf_version }}
         echo "Terraform version $(terraform version)"
+
+    - name: Configure AWS credentials 
+      id: configure_aws_credentials 
+      env:
+        aws-region: ${{ secrets.AWS_REGION }}
+        aws-assume-role: ${{ secrets.AWS_ASSUME_ROLE }}
+      uses: aws-actions/configure-aws-credentials@v4 
+      with:
+        role-to-assume: ${{ env.aws-assume-role }}
+        aws-region: ${{ env.aws-region }}
 
     - name: Run "terraform init"
       env:
