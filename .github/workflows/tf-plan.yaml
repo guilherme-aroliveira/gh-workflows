@@ -23,10 +23,6 @@ on:
       S3_LOCK:
         required: true
 
-permissions:
-  id-token: none
-  contents: read
-
 jobs:
   terraform:
     runs-on: ubuntu-latest

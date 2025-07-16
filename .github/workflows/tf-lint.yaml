@@ -13,8 +13,7 @@ on:
         type: string
 
 jobs:
-  ci:
-    name: integration
+  terraform:
     runs-on: ubuntu-latest
     defaults:
       run:
