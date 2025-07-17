@@ -17,7 +17,7 @@ jobs:
     - name: Set up gitleaks
       run: |
         sudo apt-get update
-        curl -s https://raw.githubusercontent.com/gitleaks/gitleaks/main/scripts/install.sh | 
+        curl -s https://raw.githubusercontent.com/gitleaks/gitleaks/main/scripts/install.sh | bash
 
     - name: Run gitleaks
       run: |
