@@ -31,6 +31,14 @@ on:
       # DigitalOcean
       DO_API_TOKEN:
         required: false
+      SPACES_BUCKET_NAME:
+        required: false
+      SPACES_BUCKET_KEY:
+        required: false
+      SPACES_ACCESS_KEY:
+        required: false
+      SPACES_SECRET_KEY:
+        required: false
       NEWRELIC_ACCOUNT:
         required: false
       NEWRELIC_API:
@@ -94,11 +102,30 @@ jobs:
     - name: Terraform Init (DigitalOcean)
       if: ${{ inputs.cloud_provider == 'digitalocean' && github.ref == 'refs/heads/main' }}
       env:
+        aws-region: ${{ secrets.AWS_REGION }}
+        spaces_bucket_name: ${{ secrets.SPACES_BUCKET_NAME }}
+        spaces_bucket_key: ${{ secrets.SPACES_BUCKET_KEY }}
+        access_key: ${{ secrets.SPACES_ACCESS_KEY }}
+        secret_key: ${{ secrets.SPACES_SECRET_KEY }}
         TF_VAR_do_token: ${{ secrets.DO_API_TOKEN }}
         TF_VAR_newrelic_account: ${{ secrets.NEWRELIC_ACCOUNT }}
         TF_VAR_newrelic_api: ${{ secrets.NEWRELIC_API }}
         TF_VAR_newrelic_region: ${{ secrets.NEWRELIC_REGION }}
-      run: terraform init
+      run: |
+        terraform init -backend=true \
+          -backend-config="endpoints={s3="https://nyc3.digitaloceanspaces.com"}" \
+          -backend-config="bucket=${spaces_bucket_name}" \
+          -backend-config="key=${spaces_bucket_key}" \
+          -backend-config="aws-region=${aws-region}" \
+          -backend-config="access_key=${access_key}" \
+          -backend-config="secret_key=${secret_key}" \
+          -backend-config="skip_credentials_validation=true" \
+          -backend-config="skip_requesting_account_id=true" \
+          -backend-config="skip_metadata_api_check=true" \
+          -backend-config="skip_region_validation=true" \
+          -backend-config="skip_s3_checksum=true" \
+          -backend-config="use_lockfile=true" \
+          -backend-config="encrypt=true"
 
     - name: Terraform Destroy
       if: github.ref == 'refs/heads/main'
