@@ -100,13 +100,13 @@ jobs:
         TF_VAR_newrelic_region: ${{ secrets.DO_REGION }}
       run: terraform init
 
-    - name: terraform plan
+    - name: Terraform Plan
       id: plan
       run: terraform plan -input=false -out plan
       if: github.ref == 'refs/heads/main'
       continue-on-error: false
 
-    - name: Run "terraform apply"
+    - name: Terraform Apply
       id: apply
       run: |
         echo deploying

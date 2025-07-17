@@ -100,7 +100,7 @@ jobs:
         TF_VAR_newrelic_region: ${{ secrets.DO_REGION }}
       run: terraform init
 
-    - name: Run "terraform plan"
+    - name: Terraform Plan
       id: plan
       run: terraform plan -input=false
       if: github.ref == 'refs/heads/main'

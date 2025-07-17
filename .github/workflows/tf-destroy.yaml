@@ -100,7 +100,7 @@ jobs:
         TF_VAR_newrelic_region: ${{ secrets.DO_REGION }}
       run: terraform init
 
-    - name: Run "terraform destroy"
+    - name: Terraform Destroy
       if: github.ref == 'refs/heads/main'
       run: terraform destroy -auto-approve
       continue-on-error: false
