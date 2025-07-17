@@ -29,7 +29,7 @@ on:
         required: false
 
       # DigitalOcean
-      DO_TOKEN:
+      DO_API_TOKEN:
         required: false
       NEWRELIC_ACCOUNT:
         required: false
@@ -94,7 +94,7 @@ jobs:
     - name: Terraform Init (DigitalOcean)
       if: ${{ inputs.cloud_provider == 'digitalocean' && github.ref == 'refs/heads/main' }}
       env:
-        TF_VAR_do_token: ${{ secrets.DO_TOKEN }}
+        TF_VAR_do_token: ${{ secrets.DO_API_TOKEN }}
         TF_VAR_newrelic_account: ${{ secrets.DO_ACCOUNT_ID }}
         TF_VAR_newrelic_api: ${{ secrets.DO_API_KEY }}
         TF_VAR_newrelic_region: ${{ secrets.DO_REGION }}
