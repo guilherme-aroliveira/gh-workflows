@@ -31,6 +31,8 @@ on:
       # DigitalOcean
       DO_API_TOKEN:
         required: false
+      SPACES_ENDPOINT:
+        required: false
       SPACES_BUCKET_NAME:
         required: false
       SPACES_BUCKET_KEY:
@@ -103,6 +105,7 @@ jobs:
       if: ${{ inputs.cloud_provider == 'digitalocean' && github.ref == 'refs/heads/main' }}
       env:
         aws-region: ${{ secrets.AWS_REGION }}
+        spaces-endpoint: ${{ secrets.SPACES_ENDPOINT }}
         spaces_bucket_name: ${{ secrets.SPACES_BUCKET_NAME }}
         spaces_bucket_key: ${{ secrets.SPACES_BUCKET_KEY }}
         access_key: ${{ secrets.SPACES_ACCESS_KEY }}
@@ -113,7 +116,7 @@ jobs:
         TF_VAR_newrelic_region: ${{ secrets.NEWRELIC_REGION }}
       run: |
         terraform init -backend=true \
-          -backend-config="endpoints=nyc3.digitaloceanspaces.com" \
+          -backend-config="endpoints=${spaces-endpoint}" \
           -backend-config="bucket=${spaces_bucket_name}" \
           -backend-config="key=${spaces_bucket_key}" \
           -backend-config="region=${aws-region}" \
