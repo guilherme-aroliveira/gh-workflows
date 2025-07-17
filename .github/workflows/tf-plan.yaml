@@ -113,7 +113,7 @@ jobs:
         TF_VAR_newrelic_region: ${{ secrets.NEWRELIC_REGION }}
       run: |
         terraform init -backend=true \
-          -backend-config="endpoints={s3=\"https://nyc3.digitaloceanspaces.com\"}" \
+          -backend-config="endpoints={\"s3\":\"https://nyc3.digitaloceanspaces.com\"}" \
           -backend-config="bucket=${spaces_bucket_name}" \
           -backend-config="key=${spaces_bucket_key}" \
           -backend-config="region=${aws-region}" \
@@ -125,6 +125,7 @@ jobs:
           -backend-config="skip_region_validation=true" \
           -backend-config="skip_s3_checksum=true" \
           -backend-config="use_lockfile=true" \
+          -backend-config="use_path_style=true" \
           -backend-config="encrypt=true"
 
     - name: Terraform Plan
