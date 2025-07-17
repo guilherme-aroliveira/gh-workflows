@@ -113,7 +113,7 @@ jobs:
         TF_VAR_newrelic_region: ${{ secrets.NEWRELIC_REGION }}
       run: |
         terraform init -backend=true \
-          -backend-config="endpoints=https://nyc3.digitaloceanspaces.com" \
+          -backend-config="endpoints={s3=\"https://nyc3.digitaloceanspaces.com\"}" \
           -backend-config="bucket=${spaces_bucket_name}" \
           -backend-config="key=${spaces_bucket_key}" \
           -backend-config="region=${aws-region}" \
