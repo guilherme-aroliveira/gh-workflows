@@ -59,7 +59,7 @@ jobs:
         echo "tvenf location $(which tfenv)"
         echo "tfenv version $(tfenv --version)"
 
-    - name: Setup terraform
+    - name: Set up terraform
       run: |
         tfenv install ${{ inputs.tf_version }}
         tfenv use ${{ inputs.tf_version }}
