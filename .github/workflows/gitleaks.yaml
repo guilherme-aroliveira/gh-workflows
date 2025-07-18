@@ -10,10 +10,12 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
+    - name: Set up branch
+      run: 
+        git config --global init.defaultBranch main
+
     - name: Checkout code
       uses: actions/checkout@v4
-      with:
-        ref: 'main'
 
     - name: Set up gitleaks
       run: |
