@@ -8,22 +8,17 @@ jobs:
   scan: 
     name: gitleaks
     runs-on: ubuntu-latest
-    container:
-      image: debian:bookworm
     
     steps:
     - name: Set up branch
-      run: |
-        apt-get update && \
-        apt-get install -y git curl wget && \
-        git config --global init.defaultBranch main
-        
+      run: git config --global init.defaultBranch main
+
     - name: Checkout code
       uses: actions/checkout@v4
 
     - name: Set up gitleaks
       run: |
-        apt-get update
+        sudo apt-get update
         GITLEAKS_VERSION=$(curl -s "https://api.github.com/repos/gitleaks/gitleaks/releases/latest" | grep -Po '"tag_name": "v\K[0-9.]+')
         wget -qO gitleaks.tar.gz https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz
         tar xf gitleaks.tar.gz -C /usr/local/bin gitleaks
@@ -33,7 +28,7 @@ jobs:
     - name: Run gitleaks
       run: |
         echo "Run Gitleaks and generate a JSON report"
-        gitleaks detect --source . --report-format json --report-path gitleaks-report.json
+        gitleaks detect --source ${{github.workspace}} --report-format json --report-path gitleaks-report.json
         echo "Gitleaks scan completed. Report saved as gitleaks-report.json"
 
     - name: Upload gitleaks report
