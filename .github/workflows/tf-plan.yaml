@@ -50,6 +50,10 @@ jobs:
         working-directory: ${{ inputs.working_directory }}
 
     steps:
+    - name: Set up branch
+      run:
+        git config --global init.defaultBranch main
+
     - name: Checkout repository
       uses: actions/checkout@v4
 
@@ -67,7 +71,8 @@ jobs:
       run: |
         tfenv install ${{ inputs.tf_version }}
         tfenv use ${{ inputs.tf_version }}
-        echo "Terraform version $(terraform version)"
+        tfVersion=$(terraform version)
+        echo "terraform version: $tfVersion"
 
     - name: Configure AWS credentials
       id: configure_aws_credentials
