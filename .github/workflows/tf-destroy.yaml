@@ -111,7 +111,7 @@ jobs:
           -backend-config="bucket=${aws_bucket_name}" \
           -backend-config="key=${aws_bucket_key}" \
           -backend-config="use_lockfile=${s3_locking}" \
-          -backend-config="region=${aws-region}" \
+          -backend-config="region=${aws_region}" \
           -backend-config="encrypt=true"
 
     - name: Terraform Destroy
