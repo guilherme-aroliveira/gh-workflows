@@ -18,9 +18,6 @@ jobs:
         apt-get install -y git curl wget && \
         git config --global init.defaultBranch main
 
-    - name: Checkout code
-      uses: actions/checkout@v4
-
     - name: Set up gitleaks
       run: |
         apt-get update
@@ -29,11 +26,14 @@ jobs:
         tar xf gitleaks.tar.gz -C /usr/local/bin gitleaks
         gitLeaks=$(gitleaks version)
         echo "gitleaks version: $gitLeaks"
+        
+    - name: Checkout code
+      uses: actions/checkout@v4
 
     - name: Run gitleaks
       run: |
         echo "Run Gitleaks and generate a JSON report"
-        gitleaks detect --source ${{github.workspace}} --report-format json --report-path gitleaks-report.json
+        gitleaks detect --source . --report-format json --report-path gitleaks-report.json
         echo "Gitleaks scan completed. Report saved as gitleaks-report.json"
 
     - name: Upload gitleaks report
