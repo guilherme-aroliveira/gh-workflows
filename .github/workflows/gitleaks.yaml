@@ -8,6 +8,8 @@ jobs:
   scan: 
     name: gitleaks
     runs-on: ubuntu-latest
+    container:
+      image: debian:bookworm
     
     steps:
     - name: Set up branch
