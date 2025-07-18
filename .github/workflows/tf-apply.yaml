@@ -50,10 +50,6 @@ jobs:
         working-directory: ${{ inputs.working_directory }}
 
     steps:
-    - name: Set up branch
-      run:
-        git config --global init.defaultBranch main
-
     - name: Checkout repository
       uses: actions/checkout@v4
 
