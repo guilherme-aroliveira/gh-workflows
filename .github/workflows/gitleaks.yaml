@@ -17,6 +17,9 @@ jobs:
         apt-get update && \
         apt-get install -y git curl wget && \
         git config --global init.defaultBranch main
+        
+    - name: Checkout code
+      uses: actions/checkout@v4
 
     - name: Set up gitleaks
       run: |
@@ -26,9 +29,6 @@ jobs:
         tar xf gitleaks.tar.gz -C /usr/local/bin gitleaks
         gitLeaks=$(gitleaks version)
         echo "gitleaks version: $gitLeaks"
-        
-    - name: Checkout code
-      uses: actions/checkout@v4
 
     - name: Run gitleaks
       run: |
