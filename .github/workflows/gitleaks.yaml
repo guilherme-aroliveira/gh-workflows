@@ -23,7 +23,7 @@ jobs:
 
     - name: Set up gitleaks
       run: |
-        sudo apt-get update
+        apt-get update
         GITLEAKS_VERSION=$(curl -s "https://api.github.com/repos/gitleaks/gitleaks/releases/latest" | grep -Po '"tag_name": "v\K[0-9.]+')
         wget -qO gitleaks.tar.gz https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz
         sudo tar xf gitleaks.tar.gz -C /usr/local/bin gitleaks
