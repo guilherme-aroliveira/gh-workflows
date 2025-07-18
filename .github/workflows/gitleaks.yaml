@@ -13,9 +13,9 @@ jobs:
     
     steps:
     - name: Set up branch
-      run: 
-        apt-get update \
-        apt-get install -y git \
+      run: |
+        apt-get update && \
+        apt-get install -y git && \
         git config --global init.defaultBranch main
 
     - name: Checkout code
