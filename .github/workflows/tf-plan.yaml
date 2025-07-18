@@ -50,7 +50,8 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
-    - run: git config --global init.defaultBranch
+      with:
+        ref: 'main'
 
     - name: Set up tfenv
       run: |
